@@ -95,25 +95,6 @@ public class ItemLeakDetector
         }
         else if(END_INTERVAL != 0 && --END_INTERVAL == 0)
             stop(world);
-        /*
-        if(TIME != -1 && --TIME == 0)
-            if(BATCHES == 0 && --END_INTERVAL <= 0) stop(world);
-            else
-            {
-                END_INTERVAL = TIME = INTERVAL;
-                assert POWER != null;
-                SCHEDULED.addAll(POWER);
-                for(final BlockPos p : POWER)
-                    world.updateNeighbor(p,Blocks.RED_CONCRETE,p);
-                // From my testing, it seems that using a bulk clear is a bit more
-                // efficient than simply removing the block in the neighborUpdate
-                // method. Also, this allows us to cache block updates in the UPDATE
-                // set.
-                SCHEDULED.clear();
-                for(final BlockPos p : UPDATE)
-                    world.updateNeighbor(p,Blocks.RED_CONCRETE,p);
-            }
-        */
     }
     private static void printStatistics(final ServerWorld world)
     {
