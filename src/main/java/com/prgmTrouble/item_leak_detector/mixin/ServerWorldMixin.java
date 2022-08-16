@@ -4,7 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.server.world.ServerEntityManager;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.MutableWorldProperties;
@@ -24,10 +23,17 @@ import java.util.function.Supplier;
 
 import static com.prgmTrouble.item_leak_detector.util.ItemLeakDetector.*;
 
+/**
+ * Adds hooks for spawning and ticking items.
+ * Note: There are other things that implement 'ModifiableWorld' and thus have a 'spawnEntity'
+ *       method. However, I think all of them just have to do with serialization (the items which
+ *       are generated don't need to be saved) which means they can be ignored. Also, the mod seems
+ *       to work just fine without touching them anyway.
+ */
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World implements StructureWorldAccess
 {
-    @Shadow @Final private ServerEntityManager<net.minecraft.entity.Entity> entityManager;
+    @Shadow @Final private ServerEntityManager<Entity> entityManager;
     
     protected ServerWorldMixin(final MutableWorldProperties properties,final RegistryKey<World> registryRef,
                                final DimensionType dimensionType,final Supplier<Profiler> profiler,
@@ -47,35 +53,15 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
     )
     private boolean addEntity(final ServerWorld world,final Entity entity)
     {
-        if(BATCHES != 0 && entity instanceof ItemEntity)
+        synchronized(lock)
         {
-            final double x,y,z;
+            if(leakDetectorActive() && entity instanceof ItemEntity)
             {
-                // TODO Block::dropStack called by piston (random)
-                //      ComposterBlock::emptyFullComposter (random)
-                //      JukeboxBlock::removeRecord (random)
-                //      PumpkinBlock::onUse (weird setVelocity)
-                //      ItemDispenserBehavior::spawnItem (gaussian setVelocity)
-                //      CatEntity.SleepWithOwnerGoal::dropMorningGifts (depends on cat)
-                //      DolphinEntity.PlayWithItemsGoal::spitOutItem (depends on dolphin)
-                //      FoxEntity::spit,dropItem (depends on fox)
-                //      MooshroomEntity::sheared (depends on mooshroom)
-                //      PlayerEntity::dropItem (weird setVelocity + depends on player)
-                //      FishingBobberEntity::use (weird setVelocity + depends on player + depends on bobber)
-                //      ItemScatterer::spawn (weird setVelocity)
-                //
-                final Vec3d p = entity.getPos();
-                x = p.x;
-                y = p.y;
-                z = p.z;
+                nextItem(world,entity);
+                return true;
             }
-            for(int i = 0;i < BATCH_SIZE;++i)
-                nextItem(world,entityManager,x,y,z);
-            --BATCHES;
-            return true;
+            return entityManager.addEntity(entity); //TODO potential CME?
         }
-        else
-            return entityManager.addEntity(entity);
     }
     @Inject(method = "tick",at = @At("HEAD"))
     private void tickWorld(final BooleanSupplier shouldKeepTicking,final CallbackInfo ci)

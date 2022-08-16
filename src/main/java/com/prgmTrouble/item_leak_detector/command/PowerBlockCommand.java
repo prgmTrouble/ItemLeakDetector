@@ -9,9 +9,9 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import static com.prgmTrouble.item_leak_detector.util.ItemLeakDetector.SCHEDULED;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
-import static com.prgmTrouble.item_leak_detector.util.ItemLeakDetector.SCHEDULED;
 
 public final class PowerBlockCommand
 {
@@ -20,7 +20,7 @@ public final class PowerBlockCommand
         final BlockPos pos = BlockPosArgumentType.getBlockPos(c,"pos");
         SCHEDULED.add(pos);
         final World w = c.getSource().getWorld();
-        w.updateNeighbor(pos,Blocks.RED_CONCRETE,pos);
+        w.updateNeighborsAlways(pos,Blocks.RED_CONCRETE);
         SCHEDULED.remove(pos);
         w.updateNeighborsAlways(pos,Blocks.RED_CONCRETE);
         return 1;
