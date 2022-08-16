@@ -6,12 +6,20 @@
   "mixins": [
     "BlockMixin",
     "CommandManagerMixin",
+    "ComposterBlockMixin",
+    "DolphinEntity_PlayWithItemsGoalMixin",
     "EntityMixin",
+    "ItemDispenserBehaviorMixin",
     "ItemEntityMixin",
-    "ServerWorldMixin"
+    "ItemScattererMixin",
+    "JukeboxBlockMixin",
+    "PlayerEntityMixin",
+    "PumpkinBlockMixin",
+    "ServerWorld_EntityManagerMixin",
+    "ServerWorldMixin",
+    "SheepEntityMixin"
   ],
   "client": [],
   "injectors": {
-    "defaultRequire": 1
-  }
+    "defaultRequire":1}
 }

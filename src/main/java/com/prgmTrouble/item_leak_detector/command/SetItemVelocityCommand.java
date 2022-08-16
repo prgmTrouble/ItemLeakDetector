@@ -24,6 +24,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public final class SetItemVelocityCommand
 {
+    //TODO figure out how to send this crap to the client
     public static final class Velocity
     {
         public byte relative;

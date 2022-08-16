@@ -17,9 +17,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.prgmTrouble.item_leak_detector.command.SetItemVelocityCommand.modify;
 import static com.prgmTrouble.item_leak_detector.command.SetItemVelocityCommand.velocityModifier;
-import static com.prgmTrouble.item_leak_detector.util.ItemLeakDetector.BATCHES;
 import static com.prgmTrouble.item_leak_detector.util.ItemLeakDetector.deleteItem;
+import static com.prgmTrouble.item_leak_detector.util.ItemLeakDetector.leakDetectorActive;
 
+/** Sets the velocity of an item for the item velocity command and handles despawns for the item leak command. */
 @Mixin(Entity.class)
 public abstract class EntityMixin implements Nameable,EntityLike,CommandOutput
 {
@@ -49,6 +50,6 @@ public abstract class EntityMixin implements Nameable,EntityLike,CommandOutput
     @Inject(method = "remove",at = @At("HEAD"))
     private void remove(final Entity.RemovalReason reason,final CallbackInfo ci)
     {
-        if(BATCHES != 0) deleteItem((Entity)(Object)this);
+        if(leakDetectorActive()) deleteItem((Entity)(Object)this);
     }
 }
